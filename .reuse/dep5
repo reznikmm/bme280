@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: bme280
+Upstream-Contact: Max Reznik <reznikmm@gmail.com>
+Source: https://github.com/reznikmm/bme280
+
+Files: README.md
+Copyright: 2023 Max Reznik <reznikmm@gmail.com>
+License: Apache-2.0 WITH LLVM-exception
