@@ -1,0 +1,34 @@
+--  SPDX-FileCopyrightText: 2023 Max Reznik <reznikmm@gmail.com>
+-- 
+--  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+----------------------------------------------------------------
+
+with "bme280_config.gpr";
+project Bme280 is
+
+   for Library_Name use "Bme280";
+   for Library_Version use Project'Library_Name & ".so." & Bme280_Config.Crate_Version;
+
+   for Source_Dirs use ("../source", "../source/impl");
+   for Object_Dir use "../.obj/" & Bme280_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Library_Dir use "../.lib";
+
+   type Library_Type_Type is ("relocatable", "static", "static-pic");
+   Library_Type : Library_Type_Type :=
+     external ("BME280_LIBRARY_TYPE", external ("LIBRARY_TYPE", "static"));
+   for Library_Kind use Library_Type;
+
+   package Compiler is
+      for Default_Switches ("Ada") use Bme280_Config.Ada_Compiler_Switches;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es"); --  Symbolic traceback
+   end Binder;
+
+   package Install is
+      for Artifacts (".") use ("share");
+   end Install;
+
+end Bme280;
