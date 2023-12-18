@@ -25,6 +25,12 @@ The BME280 driver enables the following functionalities:
 * Conduct measurements and calibrate the obtained values.
 * Calculate the time required for measurements.
 
+## Install
+
+Add `bme280` as a dependency to your crate with Alire:
+
+    alr with bme280
+
 ## Usage
 
 The driver implements two usage models: the generic package, which is more
@@ -61,5 +67,11 @@ begin
 
 ## Examples
 
-* [Simple example for STM32 F4VE board](../../../../examples/stm32_f4ve/bme280) - complete example for the generic instantiation.
-* [Advanced example for STM32 F4VE board and LCD & touch panel](../../../../examples/stm32_f4ve/bme280) - complete example of the tagged type usage.
+You need `Ada_Drivers_Library` in `adl` directory. Clone it then run Alire to build:
+
+    git clone https://github.com/AdaCore/Ada_Drivers_Library.git adl
+    cd examples
+    alr build
+
+* [Simple example for STM32 F4VE board](examples/bme280_put) - complete example for the generic instantiation.
+* [Advanced example for STM32 F4VE board and LCD & touch panel](examples/bme280_lcd) - complete example of the tagged type usage.

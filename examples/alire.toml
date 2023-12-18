@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2023 Max Reznik <reznikmm@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+name = "bme280_examples"
+description = "Driver for BME280 Humidity sensor"
+version = "0.2.0-dev"
+
+authors = ["Max Reznik"]
+maintainers = ["Max Reznik <reznikmm@gmail.com>"]
+maintainers-logins = ["reznikmm"]
+licenses = "Apache-2.0 WITH LLVM-exception"
+website = "https://github.com/reznikmm/bme280"
+tags = ["sensor", "humidity", "temperature", "pressure", "driver"]
+project-files = ["bme280_put/bme280_put.gpr", "bme280_lcd/bme280_lcd.gpr"]
+
+[configuration]
+generate_ada = false
+generate_c = false
+generate_gpr = false
+
+[[depends-on]]
+gnat_arm_elf = "^12.2"
+bme280 = "*"
+stm32_f4ve_full = "*"
+
+[[pins]]
+bme280 = { path='..' }
+stm32_f4ve_full = { path='../adl/boards/stm32_f4ve' }
