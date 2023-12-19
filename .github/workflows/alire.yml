@@ -14,7 +14,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: AdaCore/Ada_Drivers_Library
-        ref: topic/bme280
         path: adl
     - uses: alire-project/setup-alire@v2
     - name: Build project
