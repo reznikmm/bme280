@@ -67,11 +67,25 @@ begin
 
 ## Examples
 
-You need `Ada_Drivers_Library` in `adl` directory. Clone it then run Alire to build:
+You need `Ada_Drivers_Library` in `adl` directory. Clone it then run Alire
+to build:
 
     git clone https://github.com/AdaCore/Ada_Drivers_Library.git adl
     cd examples
     alr build
+
+### GNAT Studio
+
+Launch GNAT Studio with Alire:
+
+    cd examples; alr exec gnatstudio -- -P bme280_put/bme280_put.gpr
+
+### VS Code
+
+Make sure `alr` in the `PATH`.
+Open the `examples` folder in VS Code. Use pre-configured tasks to build
+projects and flash (openocd or st-util). Install Cortex Debug extension
+to launch pre-configured debugger targets.
 
 * [Simple example for STM32 F4VE board](examples/bme280_put) - complete example for the generic instantiation.
 * [Advanced example for STM32 F4VE board and LCD & touch panel](examples/bme280_lcd) - complete example of the tagged type usage.

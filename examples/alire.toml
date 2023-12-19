@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 name = "bme280_examples"
-description = "Driver for BME280 Humidity sensor"
-version = "0.2.0-dev"
+description = "Examples for BME280 Humidity sensor"
+version = "2.0.0-dev"
 
 authors = ["Max Reznik"]
 maintainers = ["Max Reznik <reznikmm@gmail.com>"]

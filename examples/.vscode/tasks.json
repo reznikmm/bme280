@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023 Max Reznik <reznikmm@gmail.com>
+//
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build examples",
+            "type": "shell",
+            "command": "alr build",
+            "problemMatcher": ["$ada"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Flash BME280_Put with ST-Util",
+            "type": "shell",
+            "command": "alr exec -- arm-eabi-objcopy -O binary bme280_put/.obj/main bme280_put/.obj/main.bin && st-flash --connect-under-reset write bme280_put/.obj/main.bin 0x08000000",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash BME280_Put with OpenOCD",
+            "type": "shell",
+            "command": "alr exec -- arm-eabi-objcopy -O binary bme280_put/.obj/main bme280_put/.obj/main.bin && openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c 'program bme280_put/.obj/main.bin verify reset exit 0x08000000'",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash BME280_LCD with ST-Util",
+            "type": "shell",
+            "command": "alr exec -- arm-eabi-objcopy -O binary bme280_lcd/.obj/main bme280_lcd/.obj/main.bin && st-flash --connect-under-reset write bme280_lcd/.obj/main.bin 0x08000000",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash BME280_LCD with OpenOCD",
+            "type": "shell",
+            "command": "alr exec -- arm-eabi-objcopy -O binary bme280_lcd/.obj/main bme280_lcd/.obj/main.bin && openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c 'program bme280_lcd/.obj/main.bin verify reset exit 0x08000000'",
+            "problemMatcher": []
+        }
+    ]
+}
