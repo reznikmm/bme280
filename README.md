@@ -46,8 +46,8 @@ declare
       I2C_Address => 16#76#);
 
 begin
-   if BME280_I2C.Sensor.Check_Chip_Id then
-      BME280_I2C.Sensor.Reset (Ravenscar_Time.Delays, Ok);
+   if BME280_I2C.Check_Chip_Id then
+      BME280_I2C.Reset (Ravenscar_Time.Delays, Ok);
       ...
 ```
 

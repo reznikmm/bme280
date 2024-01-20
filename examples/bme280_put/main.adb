@@ -41,20 +41,20 @@ begin
       Clock_Speed => 400_000);
 
    --  Look for BME280 chip
-   if not BME280_I2C.Sensor.Check_Chip_Id then
+   if not BME280_I2C.Check_Chip_Id then
       Ada.Text_IO.Put_Line ("BME280 not found.");
       raise Program_Error;
    end if;
 
    --  Reset BME280
-   BME280_I2C.Sensor.Reset (Ravenscar_Time.Delays, Ok);
+   BME280_I2C.Reset (Ravenscar_Time.Delays, Ok);
    pragma Assert (Ok);
 
    --  Read calibration data into Clib
-   BME280_I2C.Sensor.Read_Calibration (Calib, Ok);
+   BME280_I2C.Read_Calibration (Calib, Ok);
 
    --  Consigure IRR filter and minimal incativity delay
-   BME280_I2C.Sensor.Configure
+   BME280_I2C.Configure
      (Standby    => 0.5,
       Filter     => BME280.X16,
       SPI_3_Wire => False,
@@ -62,7 +62,7 @@ begin
    pragma Assert (Ok);
 
    --  Enable cycling of measurements with given oversamplig
-   BME280_I2C.Sensor.Start
+   BME280_I2C.Start
      (Mode        => BME280.Normal,
       Humidity    => BME280.X1,
       Pressure    => BME280.X16,
@@ -80,7 +80,7 @@ begin
       STM32.Board.Toggle (STM32.Board.D1_LED);
 
       --  Read raw values from the sensor
-      BME280_I2C.Sensor.Read_Measurement (Measurement, Ok);
+      BME280_I2C.Read_Measurement (Measurement, Ok);
 
       if Ok then
          --  Decode temperature, humidity and pressure
