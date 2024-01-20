@@ -76,7 +76,7 @@ package body BME280.Internal is
    begin
       Read (Device, Data, Ok);
 
-      return Ok and (Data (Data'First) and 8) /= 0;
+      return Ok and (Data (Data'First) and 8) = 0;
    end Measuring;
 
    ----------------------

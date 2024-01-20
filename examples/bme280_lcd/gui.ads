@@ -128,7 +128,7 @@ package GUI is
    procedure Check_Touch
      (TP     : in out HAL.Touch_Panel.Touch_Panel_Device'Class;
       Update : out Boolean);
-   --  Check buttons touchedm update State, set Update = True if State changed
+   --  Check buttons touched, update State, set Update = True if State changed
 
    procedure Draw
      (LCD   : in out HAL.Bitmap.Bitmap_Buffer'Class;

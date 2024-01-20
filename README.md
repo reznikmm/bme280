@@ -1,7 +1,7 @@
 BME280
 ======
 
-[![REUSE Compliance Check](https://github.com/reznikmm/bme280/actions/workflows/alire.yml/badge.svg)](https://github.com/reznikmm/bme280/actions/workflows/alire.yml)
+[![Build status](https://github.com/reznikmm/bme280/actions/workflows/alire.yml/badge.svg)](https://github.com/reznikmm/bme280/actions/workflows/alire.yml)
 [![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/bme280.json)](https://alire.ada.dev/crates/bme280.html)
 [![REUSE status](https://api.reuse.software/badge/github.com/reznikmm/bme280)](https://api.reuse.software/info/github.com/reznikmm/bme280)
 
