@@ -89,3 +89,12 @@ to launch pre-configured debugger targets.
 
 * [Simple example for STM32 F4VE board](examples/bme280_put) - complete example for the generic instantiation.
 * [Advanced example for STM32 F4VE board and LCD & touch panel](examples/bme280_lcd) - complete example of the tagged type usage.
+
+### Example of calibration data:
+
+```
+(t1 => 28502, t2 => 26652, t3 => 50,
+ p1 => 37088, p2 => -10615, p3 => 3024, p4 => 8809, p5 => -130,
+ p6 => -7, p7 => 9900, p8 => -10230, p9 => 4285,
+ h1 => 75, h2 => 375, h3 => 0, h4 => 289, h5 => 50, h6 => 30)
+```
