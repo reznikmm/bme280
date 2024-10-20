@@ -20,7 +20,7 @@ generate_c = false
 generate_gpr = false
 
 [[depends-on]]
-gnat_arm_elf = "^12.2"
+gnat_arm_elf = "*"
 bme280 = "*"
 stm32_f4ve_full = "*"
 

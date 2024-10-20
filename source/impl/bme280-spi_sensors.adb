@@ -9,13 +9,13 @@ package body BME280.SPI_Sensors is
 
    procedure Read
      (Self    : BME280_SPI_Sensor'Class;
-      Data    : out HAL.UInt8_Array;
+      Data    : out Byte_Array;
       Success : out Boolean);
 
    procedure Write
      (Self    : BME280_SPI_Sensor'Class;
       Address : Register_Address;
-      Data    : HAL.UInt8;
+      Data    : Byte;
       Success : out Boolean);
 
    package Sensor is
@@ -27,7 +27,7 @@ package body BME280.SPI_Sensors is
 
    overriding function Check_Chip_Id
      (Self   : BME280_SPI_Sensor;
-      Expect : HAL.UInt8 := 16#60#) return Boolean is
+      Expect : Byte := Chip_Id) return Boolean is
        (Sensor.Check_Chip_Id (Self, Expect));
 
    ---------------
@@ -53,7 +53,7 @@ package body BME280.SPI_Sensors is
 
    procedure Read
      (Self    : BME280_SPI_Sensor'Class;
-      Data    : out HAL.UInt8_Array;
+      Data    : out Byte_Array;
       Success : out Boolean)
    is
       use type HAL.UInt8;
@@ -61,6 +61,7 @@ package body BME280.SPI_Sensors is
 
       Addr : HAL.UInt8;
       Status : HAL.SPI.SPI_Status;
+      Output : HAL.SPI.SPI_Data_8b (Data'Range);
    begin
       Self.SPI_CS.Clear;
 
@@ -68,7 +69,11 @@ package body BME280.SPI_Sensors is
       Self.SPI_Port.Transmit (HAL.SPI.SPI_Data_8b'(1 => Addr), Status);
 
       if Status = Ok then
-         Self.SPI_Port.Receive (HAL.SPI.SPI_Data_8b (Data), Status);
+         Self.SPI_Port.Receive (Output, Status);
+
+         for J in Output'Range loop
+            Data (J) := Byte (Output (J));
+         end loop;
       end if;
 
       Self.SPI_CS.Set;
@@ -106,9 +111,16 @@ package body BME280.SPI_Sensors is
    overriding procedure Reset
      (Self    : BME280_SPI_Sensor;
       Timer   : not null HAL.Time.Any_Delays;
-      Success : out Boolean) is
+      Success : out Boolean)
+   is
+      procedure Sleep (MS : Positive);
+
+      procedure Sleep (MS : Positive) is
+      begin
+         Timer.Delay_Milliseconds (MS);
+      end Sleep;
    begin
-      Sensor.Reset (Self, Timer, Success);
+      Sensor.Reset (Self, Sleep'Access, Success);
    end Reset;
 
    -----------
@@ -133,7 +145,7 @@ package body BME280.SPI_Sensors is
    procedure Write
      (Self    : BME280_SPI_Sensor'Class;
       Address : Register_Address;
-      Data    : HAL.UInt8;
+      Data    : Byte;
       Success : out Boolean)
    is
       use type HAL.UInt8;
@@ -144,7 +156,8 @@ package body BME280.SPI_Sensors is
    begin
       Self.SPI_CS.Clear;
 
-      Self.SPI_Port.Transmit (HAL.SPI.SPI_Data_8b'(Prefix, Data), Status);
+      Self.SPI_Port.Transmit
+        (HAL.SPI.SPI_Data_8b'(Prefix, HAL.UInt8 (Data)), Status);
 
       Self.SPI_CS.Set;
 

@@ -16,7 +16,7 @@ generic
    I2C_Address : HAL.UInt7 := 16#76#;  --  The BME280 7-bit I2C address
 package BME280.I2C is
 
-   function Check_Chip_Id (Expect : HAL.UInt8 := 16#60#) return Boolean;
+   function Check_Chip_Id (Expect : Byte := Chip_Id) return Boolean;
    --  Read the chip ID and check that it matches
 
    procedure Reset

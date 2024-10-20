@@ -24,7 +24,7 @@ package BME280.SPI_Sensors is
 
    overriding function Check_Chip_Id
      (Self   : BME280_SPI_Sensor;
-      Expect : HAL.UInt8 := 16#60#) return Boolean;
+      Expect : Byte := Chip_Id) return Boolean;
    --  Read the chip ID and check that it matches
 
    overriding procedure Reset

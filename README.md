@@ -65,6 +65,83 @@ begin
       ...
 ```
 
+### Low-Level Interface: `BME280.Raw`
+
+The `BME280.Raw` package provides a low-level interface for interacting with
+the BME280 sensor. This package is designed to handle encoding and decoding
+of sensor register values, while allowing users to implement the actual
+read/write operations in a way that suits their hardware setup. The
+communication with the sensor is done by reading or writing one or more bytes
+to predefined registers. This package does not depend on HAL and can be used
+with DMA or any other method of interacting with the sensor.
+
+#### Purpose of BME280.Raw
+
+The package defines array subtypes where the index represents the register
+number, and the value corresponds to the register's data. Functions in this
+package help prepare and interpret the register values. For example, functions
+prefixed with `Set_` create the values for writing to registers, while those
+prefixed with `Get_` decode the values read from registers. Additionally,
+functions starting with `Is_` handle boolean logic values, such as checking
+if the sensor is measuring or updating.
+
+Users are responsible for implementing the reading and writing of these
+register values to the sensor.
+
+#### SPI and I2C Functions
+
+The package also provides helper functions for handling SPI and I2C
+communication with the sensor. For write operations, each data byte
+must be preceded by a byte containing the register address, since there
+is no auto-increment for register addresses in write mode. In contrast,
+for read operations, it's enough to specify the register address in
+the first byte, after which the sensor will automatically increment
+the register address, allowing consecutive data to be read without
+needing to specify the address for each byte.
+
+* Two functions convert register address to byte:
+
+  ```ada
+  function SPI_Write (X : Register_Address) return Byte;
+  function SPI_Read (X : Register_Address) return Byte;
+  ```
+
+* Other functions prefix a byte array with the register address:
+
+  ```ada
+    function SPI_Write (X : Byte_Array) return Byte_Array;
+    function SPI_Read (X : Byte_Array) return Byte_Array
+    function I2C_Write (X : Byte_Array) return Byte_Array;
+    function I2C_Read (X : Byte_Array) return Byte_Array;
+  ```
+
+These functions help abstract the specifics of SPI and I2C communication,
+making it easier to focus on the sensor’s register interactions without
+worrying about protocol details. For example, you configure the sensor
+by specifying the Inactivity duration and the IRR filter:
+
+```ada
+declare
+   Data : Byte_Array := BME280.Raw.SPI_Write
+    (BME280.Raw.Set_Configuration
+      (Standby    => 10.0,
+       IRR_Filter => X16,
+       SPI_3_Wire => False));
+begin
+   --  Now write Data to the sensor by SPI
+```
+
+The reading looks like this:
+
+```ada
+declare
+   Data : Byte_Array := BME280.Raw.SPI_Read
+    ((BME280.Raw.Measurement_Data => 0));
+begin
+   --  Start SPI exchange (read/write) then decode Data:
+   return BME280.Raw.Get_Measurement (Data);
+```
+
 ## Examples
 
 You need `Ada_Drivers_Library` in `adl` directory. Clone it then run Alire
@@ -98,3 +175,16 @@ to launch pre-configured debugger targets.
  p6 => -7, p7 => 9900, p8 => -10230, p9 => 4285,
  h1 => 75, h2 => 375, h3 => 0, h4 => 289, h5 => 50, h6 => 30)
 ```
+```
+(t1 => 28069, t2 => 26689, t3 => 50,
+ p1 => 36333, p2 => -10565, p3 => 3024, p4 => 7037, p5 => -18,
+ p6 => -7, p7 => 9900, p8 => -10230, p9 => 4285,
+ h1 => 75, h2 => 368, h3 => 0, h4 => 305, h5 => 50, h6 => 30)
+```
+```
+(t1 => 28301, t2 => 26667, t3 => 50,
+ p1 => 36414, p2 => -10619, p3 => 3024, p4 => 9568, p5 => -163,
+ p6 => -7, p7 => 9900, p8 => -10230, p9 => 4285,
+ h1 => 75, h2 => 374, h3 => 0, h4 => 290, h5 => 50, h6 => 30)
+```
+

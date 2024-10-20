@@ -3,12 +3,10 @@
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 ----------------------------------------------------------------
 
-pragma Ada_2022;
-
 package body BME280 is
 
    OS_Map : constant array (Oversampling_Kind) of Natural :=
-     [Skip => 0, X1 => 1, X2 => 2, X4 => 4, X8 => 8, X16 => 16];
+     (Skip => 0, X1 => 1, X2 => 2, X4 => 4, X8 => 8, X16 => 16);
    --  Map Oversamping_Kind to the integer value
 
    --------------

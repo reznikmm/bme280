@@ -3,14 +3,12 @@
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 ----------------------------------------------------------------
 
-with HAL.Time;
-
 generic
    type Device_Context (<>) is limited private;
 
    with procedure Read
      (Device  : Device_Context;
-      Data    : out HAL.UInt8_Array;
+      Data    : out Byte_Array;
       Success : out Boolean);
    --  Read the values from the BME280 chip registers into Data.
    --  Each element in the Data corresponds to a specific register address
@@ -21,7 +19,7 @@ generic
    with procedure Write
      (Device  : Device_Context;
       Address : Register_Address;
-      Data    : HAL.UInt8;
+      Data    : Byte;
       Success : out Boolean);
    --  Write the value to the BME280 chip register with given Address.
 
@@ -29,12 +27,12 @@ package BME280.Internal is
 
    function Check_Chip_Id
      (Device : Device_Context;
-      Expect : HAL.UInt8) return Boolean;
+      Expect : Byte) return Boolean;
    --  Read the chip ID and check that it matches
 
    procedure Reset
      (Device  : Device_Context;
-      Timer   : not null HAL.Time.Any_Delays;
+      Timer   : not null access procedure (Millisecond : Positive);
       Success : out Boolean);
    --  Issue a soft reset and wait until the chip is ready.
 

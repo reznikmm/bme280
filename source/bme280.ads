@@ -4,7 +4,6 @@
 ----------------------------------------------------------------
 
 with Interfaces;
-with HAL;
 
 package BME280 is
    pragma Preelaborate;
@@ -78,9 +77,6 @@ package BME280 is
          | 62.5 | 125.0 | 250.0 | 500.0 | 1000.0;
    --  Inactivity duration in ms
 
-   subtype Register_Address is Natural range 16#80# .. 16#FF#;
-   --  Sensor registers addresses
-
    function Max_Measurement_Time
      (Humidity    : Oversampling_Kind := X1;
       Pressure    : Oversampling_Kind := X1;
@@ -93,14 +89,27 @@ package BME280 is
       Temperature : Oversampling_Kind := X1) return Positive;
    --  Typical measurement time in microseconds
 
+   Chip_Id : constant := 16#60#;
+
+   subtype Register_Address is Natural range 16#00# .. 16#FF#;
+   --  Sensor's register address
+
+   subtype Byte is Interfaces.Unsigned_8;  --  Register value
+
+   type Byte_Array is array (Register_Address range <>) of Byte;
+   --  Bytes to be exchanged with registers. Index is a register address, while
+   --  elements are corresponding register values.
+
 private
 
    for Sensor_Mode use (Sleep => 0, Forced => 1, Normal => 3);
 
+   type Unsigned_20 is mod 2**20;
+
    type Measurement is record
-      Raw_Press : HAL.UInt20;
-      Raw_Temp  : HAL.UInt20;
-      Raw_Hum   : HAL.UInt16;
+      Raw_Press : Unsigned_20;
+      Raw_Temp  : Unsigned_20;
+      Raw_Hum   : Interfaces.Integer_16;
    end record;
 
 end BME280;

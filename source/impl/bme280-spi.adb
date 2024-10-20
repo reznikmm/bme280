@@ -13,13 +13,13 @@ package body BME280.SPI is
 
    procedure Read
      (Ignore  : Null_Record;
-      Data    : out HAL.UInt8_Array;
+      Data    : out Byte_Array;
       Success : out Boolean);
 
    procedure Write
      (Ignore  : Null_Record;
       Address : Register_Address;
-      Data    : HAL.UInt8;
+      Data    : Byte;
       Success : out Boolean);
 
    ------------
@@ -32,7 +32,7 @@ package body BME280.SPI is
    -- Check_Chip_Id --
    -------------------
 
-   function Check_Chip_Id (Expect : HAL.UInt8 := 16#60#) return Boolean
+   function Check_Chip_Id (Expect : Byte := Chip_Id) return Boolean
      is (Sensor.Check_Chip_Id (Chip, Expect));
 
    ---------------
@@ -60,7 +60,7 @@ package body BME280.SPI is
 
    procedure Read
      (Ignore  : Null_Record;
-      Data    : out HAL.UInt8_Array;
+      Data    : out Byte_Array;
       Success : out Boolean)
    is
       use type HAL.UInt8;
@@ -68,6 +68,7 @@ package body BME280.SPI is
 
       Addr : HAL.UInt8;
       Status : HAL.SPI.SPI_Status;
+      Output : HAL.SPI.SPI_Data_8b (Data'Range);
    begin
       SPI.SPI_CS.Clear;
 
@@ -75,7 +76,11 @@ package body BME280.SPI is
       SPI_Port.Transmit (HAL.SPI.SPI_Data_8b'(1 => Addr), Status);
 
       if Status = Ok then
-         SPI_Port.Receive (HAL.SPI.SPI_Data_8b (Data), Status);
+         SPI_Port.Receive (Output, Status);
+
+         for J in Output'Range loop
+            Data (J) := Byte (Output (J));
+         end loop;
       end if;
 
       SPI.SPI_CS.Set;
@@ -111,9 +116,16 @@ package body BME280.SPI is
 
    procedure Reset
      (Timer   : not null HAL.Time.Any_Delays;
-      Success : out Boolean) is
+      Success : out Boolean)
+   is
+      procedure Sleep (MS : Positive);
+
+      procedure Sleep (MS : Positive) is
+      begin
+         Timer.Delay_Milliseconds (MS);
+      end Sleep;
    begin
-      Sensor.Reset (Chip, Timer, Success);
+      Sensor.Reset (Chip, Sleep'Access, Success);
    end Reset;
 
    -----------
@@ -137,7 +149,7 @@ package body BME280.SPI is
    procedure Write
      (Ignore  : Null_Record;
       Address : Register_Address;
-      Data    : HAL.UInt8;
+      Data    : Byte;
       Success : out Boolean)
    is
       use type HAL.UInt8;
@@ -148,7 +160,8 @@ package body BME280.SPI is
    begin
       SPI.SPI_CS.Clear;
 
-      SPI_Port.Transmit (HAL.SPI.SPI_Data_8b'(Prefix, Data), Status);
+      SPI_Port.Transmit
+        (HAL.SPI.SPI_Data_8b'(Prefix, HAL.UInt8 (Data)), Status);
 
       SPI.SPI_CS.Set;
 

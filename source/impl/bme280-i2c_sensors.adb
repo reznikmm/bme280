@@ -9,13 +9,13 @@ package body BME280.I2C_Sensors is
 
    procedure Read
      (Self    : BME280_I2C_Sensor'Class;
-      Data    : out HAL.UInt8_Array;
+      Data    : out Byte_Array;
       Success : out Boolean);
 
    procedure Write
      (Self    : BME280_I2C_Sensor'Class;
       Address : Register_Address;
-      Data    : HAL.UInt8;
+      Data    : Byte;
       Success : out Boolean);
 
    package Sensor is
@@ -27,7 +27,7 @@ package body BME280.I2C_Sensors is
 
    overriding function Check_Chip_Id
      (Self   : BME280_I2C_Sensor;
-      Expect : HAL.UInt8 := 16#60#) return Boolean is
+      Expect : Byte := Chip_Id) return Boolean is
        (Sensor.Check_Chip_Id (Self, Expect));
 
    ---------------
@@ -53,20 +53,25 @@ package body BME280.I2C_Sensors is
 
    procedure Read
      (Self    : BME280_I2C_Sensor'Class;
-      Data    : out HAL.UInt8_Array;
+      Data    : out Byte_Array;
       Success : out Boolean)
    is
       use type HAL.I2C.I2C_Status;
       use type HAL.UInt10;
 
+      Output : HAL.I2C.I2C_Data (Data'Range);
       Status : HAL.I2C.I2C_Status;
    begin
       Self.I2C_Port.Mem_Read
         (Addr          => 2 * HAL.UInt10 (Self.I2C_Address),
          Mem_Addr      => HAL.UInt16 (Data'First),
          Mem_Addr_Size => HAL.I2C.Memory_Size_8b,
-         Data          => Data,
+         Data          => Output,
          Status        => Status);
+
+      for J in Output'Range loop
+         Data (J) := Byte (Output (J));
+      end loop;
 
       Success := Status = HAL.I2C.Ok;
    end Read;
@@ -101,9 +106,16 @@ package body BME280.I2C_Sensors is
    overriding procedure Reset
      (Self    : BME280_I2C_Sensor;
       Timer   : not null HAL.Time.Any_Delays;
-      Success : out Boolean) is
+      Success : out Boolean)
+   is
+      procedure Sleep (MS : Positive);
+
+      procedure Sleep (MS : Positive) is
+      begin
+         Timer.Delay_Milliseconds (MS);
+      end Sleep;
    begin
-      Sensor.Reset (Self, Timer, Success);
+      Sensor.Reset (Self, Sleep'Access, Success);
    end Reset;
 
    -----------
@@ -128,7 +140,7 @@ package body BME280.I2C_Sensors is
    procedure Write
      (Self    : BME280_I2C_Sensor'Class;
       Address : Register_Address;
-      Data    : HAL.UInt8;
+      Data    : Byte;
       Success : out Boolean)
    is
       use type HAL.I2C.I2C_Status;
@@ -140,7 +152,7 @@ package body BME280.I2C_Sensors is
         (Addr          => 2 * HAL.UInt10 (Self.I2C_Address),
          Mem_Addr      => HAL.UInt16 (Address),
          Mem_Addr_Size => HAL.I2C.Memory_Size_8b,
-         Data          => (1 => Data),
+         Data          => (1 => HAL.UInt8 (Data)),
          Status        => Status);
 
       Success := Status = HAL.I2C.Ok;

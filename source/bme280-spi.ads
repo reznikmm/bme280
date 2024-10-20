@@ -17,7 +17,7 @@ generic
    SPI_CS   : not null HAL.GPIO.Any_GPIO_Point;
 package BME280.SPI is
 
-   function Check_Chip_Id (Expect : HAL.UInt8 := 16#60#) return Boolean;
+   function Check_Chip_Id (Expect : Byte := Chip_Id) return Boolean;
    --  Read the chip ID and check that it matches
 
    procedure Reset
