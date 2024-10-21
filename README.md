@@ -166,6 +166,7 @@ to launch pre-configured debugger targets.
 
 * [Simple example for STM32 F4VE board](examples/bme280_put) - complete example for the generic instantiation.
 * [Advanced example for STM32 F4VE board and LCD & touch panel](examples/bme280_lcd) - complete example of the tagged type usage.
+* [Simple example for SPI1 on STM32 F4VE board](examples/bme280_spi) - SPI example.
 
 ### Example of calibration data:
 
@@ -187,4 +188,3 @@ to launch pre-configured debugger targets.
  p6 => -7, p7 => 9900, p8 => -10230, p9 => 4285,
  h1 => 75, h2 => 374, h3 => 0, h4 => 290, h5 => 50, h6 => 30)
 ```
-

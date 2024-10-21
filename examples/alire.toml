@@ -12,7 +12,7 @@ maintainers-logins = ["reznikmm"]
 licenses = "Apache-2.0 WITH LLVM-exception"
 website = "https://github.com/reznikmm/bme280"
 tags = ["sensor", "humidity", "temperature", "pressure", "driver"]
-project-files = ["bme280_put/bme280_put.gpr", "bme280_lcd/bme280_lcd.gpr"]
+project-files = ["bme280_put/bme280_put.gpr", "bme280_lcd/bme280_lcd.gpr", "bme280_spi/bme280_spi.gpr"]
 
 [configuration]
 generate_ada = false
