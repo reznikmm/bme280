@@ -41,6 +41,19 @@ package body BME280.Internal is
       Write (Device, Data'First, Data (Data'First), Success);
    end Configure;
 
+   -----------------
+   -- Is_Reseting --
+   -----------------
+
+   function Is_Reseting (Device  : Device_Context) return Boolean is
+      Ok   : Boolean;
+      Data : Raw.Status_Data;
+   begin
+      Read (Device, Data, Ok);
+
+      return not Ok or else Raw.Is_Reseting (Data);
+   end Is_Reseting;
+
    ---------------
    -- Measuring --
    ---------------
@@ -100,28 +113,11 @@ package body BME280.Internal is
 
    procedure Reset
      (Device  : Device_Context;
-      Timer   : not null access procedure (Millisecond : Positive);
       Success : out Boolean)
    is
       Reset : Byte_Array renames Raw.Set_Reset;
-      Data : Raw.Status_Data;
    begin
       Write (Device, Reset'First, Reset (Reset'First), Success);
-
-      if not Success then
-         return;
-      end if;
-
-      for J in 1 .. 3 loop
-         Timer (2);
-         Read (Device, Data, Success);
-
-         if Success and then not Raw.Is_Reseting (Data) then
-            return;
-         end if;
-      end loop;
-
-      Success := False;
    end Reset;
 
    -----------

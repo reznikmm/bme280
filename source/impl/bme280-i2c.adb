@@ -109,16 +109,20 @@ package body BME280.I2C is
 
    procedure Reset
      (Timer   : not null HAL.Time.Any_Delays;
-      Success : out Boolean)
-   is
-      procedure Sleep (MS : Positive);
-
-      procedure Sleep (MS : Positive) is
-      begin
-         Timer.Delay_Milliseconds (MS);
-      end Sleep;
+      Success : out Boolean) is
    begin
-      Sensor.Reset (Chip, Sleep'Access, Success);
+      Sensor.Reset (Chip, Success);
+
+      if Success then
+         for J in 1 .. 3 loop
+            Timer.Delay_Milliseconds (2);
+            if not Sensor.Is_Reseting (Chip) then
+               return;
+            end if;
+         end loop;
+
+         Success := False;
+      end if;
    end Reset;
 
    -----------

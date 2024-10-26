@@ -32,9 +32,11 @@ package BME280.Internal is
 
    procedure Reset
      (Device  : Device_Context;
-      Timer   : not null access procedure (Millisecond : Positive);
       Success : out Boolean);
    --  Issue a soft reset and wait until the chip is ready.
+
+   function Is_Reseting (Device  : Device_Context) return Boolean;
+   --  Check if a reset is in progress
 
    procedure Configure
      (Device     : Device_Context;
