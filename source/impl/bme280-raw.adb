@@ -84,9 +84,9 @@ package body BME280.Raw is
          + Shift_Left  (Unsigned_32 (Raw (16#FB#)), 4)
          + Shift_Right (Unsigned_32 (Raw (16#FC#)), 4));
 
-      Value.Raw_Hum := Interfaces.Integer_16
-        (Shift_Left (Unsigned_16 (Raw (16#FD#)), 8)
-         + Unsigned_16 (Raw (16#FE#)));
+      Value.Raw_Hum :=
+        Shift_Left (Unsigned_16 (Raw (16#FD#)), 8)
+        + Unsigned_16 (Raw (16#FE#));
 
       return Value;
    end Get_Measurement;

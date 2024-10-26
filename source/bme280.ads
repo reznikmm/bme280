@@ -1,4 +1,4 @@
---  SPDX-FileCopyrightText: 2023 Max Reznik <reznikmm@gmail.com>
+--  SPDX-FileCopyrightText: 2023-2024 Max Reznik <reznikmm@gmail.com>
 --
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 ----------------------------------------------------------------
@@ -109,7 +109,7 @@ private
    type Measurement is record
       Raw_Press : Unsigned_20;
       Raw_Temp  : Unsigned_20;
-      Raw_Hum   : Interfaces.Integer_16;
+      Raw_Hum   : Interfaces.Unsigned_16;
    end record;
 
 end BME280;
