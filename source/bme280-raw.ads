@@ -22,6 +22,7 @@
 --  The user is responsible for reading and writing register values!
 
 package BME280.Raw is
+   pragma Pure;
 
    use type Interfaces.Integer_16;
    use type Interfaces.Unsigned_8;

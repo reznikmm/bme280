@@ -6,7 +6,7 @@
 with Interfaces;
 
 package BME280 is
-   pragma Preelaborate;
+   pragma Pure;
    pragma Discard_Names;
 
    type Calibration_Constants is record
