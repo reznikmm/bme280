@@ -3,13 +3,13 @@
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 ----------------------------------------------------------------
 
-with "stm32_f4ve_full.gpr";
+with "blinky_stm32_f4ve.gpr";
 --  with "bme280.gpr";
---  Can't depend on it, because stm32_f4ve_full has a copy of HAL
+--  Can't depend on it, because Blinky_STM32_f4VE has a copy of HAL
 
 project BME280_Put is
 
-   for Runtime ("Ada") use STM32_f4VE_Full'Runtime ("Ada");
+   for Runtime ("Ada") use Blinky_STM32_F4VE'Runtime ("Ada");
    for Target use "arm-eabi";
    for Main use ("main.adb");
    for Languages use ("Ada");
@@ -17,7 +17,7 @@ project BME280_Put is
    for Object_Dir use ".obj/";
    for Create_Missing_Dirs use "True";
 
-   package Compiler renames STM32_F4VE_Full.Compiler;
+   package Compiler renames Blinky_STM32_F4VE.Compiler;
 
    package Ide is
       for Program_Host use "localhost:4242";

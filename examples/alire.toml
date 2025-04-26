@@ -22,8 +22,8 @@ generate_gpr = false
 [[depends-on]]
 gnat_arm_elf = "*"
 bme280 = "*"
-stm32_f4ve_full = "*"
+blinky_stm32_f4ve = "*"
 
 [[pins]]
 bme280 = { path='..' }
-stm32_f4ve_full = { path='../adl/boards/stm32_f4ve' }
+blinky_stm32_f4ve = { url='https://github.com/AdaCore/Ada_Drivers_Library', subdir='examples/stm32_f4ve' }
