@@ -33,6 +33,9 @@ Add `bme280` as a dependency to your crate with Alire:
 
 ## Usage
 
+The sensor supports SPI (mode 0 or 3) with a frequency of up to 10 MHz
+and I2C at frequencies up to 2.7 MHz.
+
 The driver implements two usage models: the generic package, which is more
 convenient when dealing with a single sensor, and the tagged type, which
 allows easy creation of objects for any number of sensors and uniform handling.
