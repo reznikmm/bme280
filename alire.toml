@@ -10,6 +10,25 @@ website = "https://github.com/reznikmm/bme280"
 tags = ["sensor", "humidity", "temperature", "pressure", "driver"]
 project-files = ["gnat/bme280.gpr"]
 
+long-description = '''
+# Driver for BME280 humidity, pressure and temperature sensor
+
+The BME280 driver enables the following functionalities:
+
+- Detect the presence of the sensor.
+- Perform a reset operation.
+- Configure the parameters of the IRR filter and oversampling for each channel.
+- Read calibration coefficients.
+- Conduct measurements and calibrate the obtained values.
+- Calculate the time required for measurements.
+
+The driver supports usage both with and without the Ada Driver Library,
+either via generic instantiation or by instantiating tagged type object.
+
+More drivers in this style:
+[driver index](https://github.com/reznikmm/reznikmm/blob/main/drivers.md).
+'''
+
 [configuration]
 output_dir = "gnat"
 generate_ada = false
