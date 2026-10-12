@@ -1,7 +1,7 @@
---  SPDX-FileCopyrightText: 2024 Max Reznik <reznikmm@gmail.com>
+--  SPDX-FileCopyrightText: 2024-2026 Max Reznik <reznikmm@gmail.com>
 --
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-----------------------------------------------------------------
+---------------------------------------------------------------------
 
 --  This package provides a low-level interface for interacting with the
 --  sensor. Communication with the sensor is done by reading/writing one

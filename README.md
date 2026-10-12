@@ -20,7 +20,7 @@ The BME280 driver enables the following functionalities:
 
 * Detect the presence of the sensor.
 * Perform a reset operation.
-* Configure the parameters of the IRR filter and oversampling for each channel.
+* Configure the parameters of the (shared) IRR filter and oversampling (for each channel).
 * Read calibration coefficients.
 * Conduct measurements and calibrate the obtained values.
 * Calculate the time required for measurements.
@@ -189,3 +189,26 @@ to launch pre-configured debugger targets.
  p6 => -7, p7 => 9900, p8 => -10230, p9 => 4285,
  h1 => 75, h2 => 374, h3 => 0, h4 => 290, h5 => 50, h6 => 30)
 ```
+
+The same in fixed types:
+
+|Reg | Sample 1      | Sample 2      | Sample 3      |
+|:---|          ---: |          ---: |          ---: |
+| T1 | 27.8340       | 27.4111       | 27.6377       |
+| T2 | 52.055        | 52.127        | 52.084        |
+| T3 | 0.00153       | 0.00153       | 0.00153       |
+| P1 | 37088.0       | 36333.0       | 36414.0       |
+| P2 |-0.00015818    |-0.00015743    |-0.00015824    |
+| P3 | 0.000000022002| 0.000000022002| 0.000000022002|
+| P4 | 140944.0      | 112592.0      | 153088.0      |
+| P5 |-4.06          |-0.56          |-5.09          |
+| P6 |-0.0009        |-0.0009        |-0.0009        |
+| P7 | 618.75        | 618.75        | 618.75        |
+| P8 |-0.019512      |-0.019512      |-0.019512      |
+| P9 | 0.00000012471 | 0.00000012471 | 0.00000012471 |
+| H1 | 0.000143      | 0.000143      | 0.000143      |
+| H2 | 0.00572       | 0.00562       | 0.00571       |
+| H3 | 0.000000      | 0.000000      | 0.000000      |
+| H4 | 18496.0       | 19520.0       | 18560.0       |
+| H5 | 1.56          | 1.56          | 1.56          |
+| H6 | 0.000229      | 0.000229      | 0.000229      |

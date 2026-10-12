@@ -1,13 +1,19 @@
---  SPDX-FileCopyrightText: 2023 Max Reznik <reznikmm@gmail.com>
+--  SPDX-FileCopyrightText: 2023-2026 Max Reznik <reznikmm@gmail.com>
 --
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-----------------------------------------------------------------
+---------------------------------------------------------------------
 
 package body BME280 is
 
-   OS_Map : constant array (Oversampling_Kind) of Natural :=
-     (Skip => 0, X1 => 1, X2 => 2, X4 => 4, X8 => 8, X16 => 16);
-   --  Map Oversamping_Kind to the integer value
+   function Slowdown (Kind : Oversampling_Kind) return Natural is
+     (case Kind is
+         when Skip => 0,
+         when X1 => 1,
+         when X2 => 2,
+         when X4 => 4,
+         when X8 => 8,
+         when X16 => 16);
+   --  Map Oversamping_Kind to the integer slowdown coefficient
 
    --------------
    -- Humidity --
@@ -18,31 +24,29 @@ package body BME280 is
       Temperature : Deci_Celsius;
       Calibration : Calibration_Constants) return Relative_Humidity
    is
-      Var_1 : constant Integer :=
-        Integer (Temperature / Deci_Celsius'Small) - 76800;
-      Var_2 : Integer := Integer (Value.Raw_Hum) * 16384;
-      Var_3 : Integer := Integer (Calibration.H4) * 1048576;
-      Var_4 : Integer := Integer (Calibration.H5) * Var_1;
-      Var_5 : Integer := (Var_2 - Var_3 - Var_4 + 16384) / 32768;
+      --  T = Temperature - 15.0 C (in deci-celsius)
+      --  B = 1 + T * H3,
+      --  F = B * (1 + T * H6 * B)
+      --  X = (ADC - H4 - T * H5) * H2 * F,
+      --  RH = X * (1 - X * H1)
+      type Offset is delta 2.0**(-11) range -2.0**19 .. 2.0**19;
+      type Factor is delta 2.0**(-24) range -2.0**6 .. 2.0**6;
+      type Wide is delta 2.0**(-10) range -2.0**20 .. 2.0**20;
+
+      Max : constant Wide := Wide (Relative_Humidity'Last);
+
+      C : Calibration_Constants renames Calibration;
+
+      T : constant Offset := Offset (Temperature) - 150.0;  --  from 15.0 C
+      B : constant Factor := 1.0 + T * C.H3;
+      F : constant Factor := B * Factor'(1.0 + Factor (T * C.H6) * B);
+      H : constant Offset := 1.0 * Value.Raw_Hum - 1.0 * C.H4 - T * C.H5;
+      X : constant Wide := Wide (H * C.H2) * F;
+
+      Result : constant Wide := X * Factor'(1.0 - X * C.H1);
 
    begin
-      --  var2 = (var1 * ((int32_t)calib_data->dig_h6)) / 1024;
-      Var_2 := Var_1 * Integer (Calibration.H6) / 1024;
-      --  var3 = (var1 * ((int32_t)calib_data->dig_h3)) / 2048;
-      Var_3 := Var_1 * Integer (Calibration.H3) / 2048;
-      --  var4 = ((var2 * (var3 + (int32_t)32768)) / 1024) + (int32_t)2097152;
-      Var_4 := Var_2 * (Var_3 + 32768) / 1024 + 2097152;
-      --  var2 = ((var4 * ((int32_t)calib_data->dig_h2)) + 8192) / 16384;
-      Var_2 := (Var_4 * Integer (Calibration.H2) + 8192) / 16384;
-      --  var3 = var5 * var2;
-      Var_3 := Var_5 * Var_2;
-      --  var4 = ((var3 / 32768) * (var3 / 32768)) / 128;
-      Var_4 := (Var_3 / 32768)**2 / 128;
-      --  var5 = var3 - ((var4 * ((int32_t)calib_data->dig_h1)) / 16);
-      Var_5 := Var_3  - Var_4 * Integer (Calibration.H1) / 16;
-      Var_5 := Integer'Max (0, Integer'Min (100 * 2 ** 10, Var_5 / 4096));
-
-      return Relative_Humidity'Small * Var_5;
+      return Relative_Humidity (Wide'Max (0.0, Wide'Min (Result, Max)));
    end Humidity;
 
    --------------------------
@@ -54,9 +58,9 @@ package body BME280 is
       Pressure    : Oversampling_Kind := X1;
       Temperature : Oversampling_Kind := X1) return Positive is
         (1_250
-         + (if Temperature = Skip then 0 else 2_300 * OS_Map (Temperature))
-         + (if Pressure = Skip then 0 else 2_300 * OS_Map (Pressure) + 575)
-         + (if Humidity = Skip then 0 else 2_300 * OS_Map (Humidity) + 575));
+         + (if Temperature = Skip then 0 else 2_300 * Slowdown (Temperature))
+         + (if Pressure = Skip then 0 else 2_300 * Slowdown (Pressure) + 575)
+         + (if Humidity = Skip then 0 else 2_300 * Slowdown (Humidity) + 575));
 
    --------------
    -- Pressure --
@@ -67,44 +71,45 @@ package body BME280 is
       Temperature : Deci_Celsius;
       Calibration : Calibration_Constants) return Pressure_Pa
    is
-      use Interfaces;
+      --  T = Temperature - 25.0 C (in deci-celsius)
+      --  P = (2**20 - ADC - (P4 + T * (P5 + T * P6)))
+      --        * 6250 / (P1 * (1 + T * (P2 + T * P3)))
+      --  Pa = P7 + P * (1 + P8 + P * P9)
+      type Offset is delta 2.0**(-9) range -2.0**12 .. 2.0**12;
+      type Slope is delta 2.0**(-38) range -2.0**(-8) .. 2.0**(-8);
+      type Factor is delta 2.0**(-26) range -2.0**4 .. 2.0**4;
+      type Linear is delta 2.0**(-14) range -2.0**16 .. 2.0**16;
+      type Ratio is delta 2.0**(-24) range -2.0**6 .. 2.0**6;
+      type Denominator is delta 2.0**(-13) range -2.0**17 .. 2.0**17;
+      type Wide is delta 2.0**(-8) range -2.0**22 .. 2.0**22;
 
-      Var_1 : Integer_64 :=
-        Integer_64 (Temperature / Deci_Celsius'Small) - 128000;
+      Min : constant Wide := Wide (Pressure_Pa'First);
+      Max : constant Wide := Wide (Pressure_Pa'Last);
 
-      Var_2 : Integer_64 := Var_1**2 * Integer_64 (Calibration.P6);
-      Var_3 : constant Integer_64 := 140737488355328;
-      Var_4 : Integer_64 := 1048576 - Integer_64 (Value.Raw_Press);
+      C : Calibration_Constants renames Calibration;
 
-      Result : Pressure_Pa'Base;
+      P2 : constant Slope := Slope (C.P2);
+      P4 : constant Wide := Wide (C.P4);
+      P5 : constant Linear := Linear (C.P5);
+      P7 : constant Wide := Wide (C.P7);
+      P8 : constant Factor := Factor (C.P8);
+
+      T  : constant Offset := Offset (Temperature) - 250.0;  --  from 25.0 C
+      K  : constant Factor := 1.0 + T * Slope'(P2 + T * C.P3);
+      D  : constant Wide := P4 + T * Linear'(P5 + T * C.P6);
+      N  : constant Wide := Wide (2**20 - Value.Raw_Press) - D;
+      Q  : constant Denominator := C.P1 * K;
+
+      Result : Wide;
+
    begin
-      Var_2 := Var_2 + Var_1 * Integer_64 (Calibration.P5) * 131072;
-      Var_2 := Var_2 + Integer_64 (Calibration.P4) * 34359738368;
-
-      Var_1 := Var_1 ** 2 * Integer_64 (Calibration.P3) / 256 +
-        Var_1 * Integer_64 (Calibration.P2) * 4096;
-
-      Var_1 := (Var_3 + Var_1) * Integer_64 (Calibration.P1) / 8589934592;
-
-      if Var_1 = 0 then
+      if Q <= 0.0 then
          return Pressure_Pa'First;
-      end if;
-
-      Var_4 := (Var_4 * 2147483648 - Var_2) * 3125 / Var_1;
-      Var_1 := Integer_64 (Calibration.P9) * (Var_4 / 8192)**2 / 33554432;
-      Var_2 := Integer_64 (Calibration.P8) * Var_4 / 524288;
-
-      Var_4 := (Var_4 + Var_1 + Var_2) / 256
-        + Integer_64 (Calibration.P7) * 16;
-
-      Result := Pressure_Pa'Small * Integer (Var_4);
-
-      if Result < Pressure_Pa'First then
-         return Pressure_Pa'First;
-      elsif Result > Pressure_Pa'Last then
-         return Pressure_Pa'Last;
       else
-         return Result;
+         Result := Ratio'(N / Q) * 6250.0;
+         Result := P7 + Result * Factor'(1.0 + P8 + Result * C.P9);
+
+         return Pressure_Pa (Wide'Max (Min, Wide'Min (Result, Max)));
       end if;
    end Pressure;
 
@@ -116,17 +121,25 @@ package body BME280 is
      (Value       : Measurement;
       Calibration : Calibration_Constants) return Deci_Celsius
    is
-      Diff : constant Integer :=
-        Integer (Value.Raw_Temp) / 8 - 2 * Integer (Calibration.T1);
+      --  X = ADC / 2**14 - T1
+      --  T = X * (T2 + X * T3)   (in deci-celsius)
+      type ADC is delta 2.0**(-14) range -2.0**7 .. 2.0**7;
+      type Slope is delta 2.0**(-20) range -2.0**8 .. 2.0**8;
+      type Wide is delta 2.0**(-9) range -2.0**16 .. 2.0**16;
 
-      Val_1 : constant Integer :=
-        (Diff * Integer (Calibration.T2)) / 2 ** 11;
+      C : Calibration_Constants renames Calibration;
 
-      Val_2 : constant Integer :=
-        (Diff / 2) ** 2 / 2 ** 12 * Integer (Calibration.T3) / 2 ** 14;
+      T1 : constant ADC := ADC (C.T1);
+      T2 : constant Slope := Slope (C.T2);
+
+      Diff   : constant ADC := ADC'Small * Value.Raw_Temp - T1;
+      Result : constant Wide := Diff * (T2 + Diff * C.T3);
+
+      Min : constant Wide := Wide (Deci_Celsius'First);
+      Max : constant Wide := Wide (Deci_Celsius'Last);
 
    begin
-      return Deci_Celsius'Small * (Val_1 + Val_2);
+      return Deci_Celsius (Wide'Max (Min, Wide'Min (Result, Max)));
    end Temperature;
 
    ------------------------------
@@ -138,8 +151,8 @@ package body BME280 is
       Pressure    : Oversampling_Kind := X1;
       Temperature : Oversampling_Kind := X1) return Positive is
         (1_000
-         + (if Temperature = Skip then 0 else 2_000 * OS_Map (Temperature))
-         + (if Pressure = Skip then 0 else 2_000 * OS_Map (Pressure) + 500)
-         + (if Humidity = Skip then 0 else 2_000 * OS_Map (Humidity) + 500));
+         + (if Temperature = Skip then 0 else 2_000 * Slowdown (Temperature))
+         + (if Pressure = Skip then 0 else 2_000 * Slowdown (Pressure) + 500)
+         + (if Humidity = Skip then 0 else 2_000 * Slowdown (Humidity) + 500));
 
 end BME280;
