@@ -16,7 +16,7 @@ The display includes buttons for enabling/disabling the display of
 temperature (Te), humidity (Hu), and pressure (Pr) data. Additionally,
 there are buttons (`x1` .. `16`) next to each data type for controlling
 the oversampling parameters. Additionally, buttons labeled `No`, `x2` .. `16`
-adjust the IRR filter.
+adjust the IIR filter.
 
 ## Requirements
 

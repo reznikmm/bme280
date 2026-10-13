@@ -88,6 +88,17 @@ package BME280 is
       Calibration : Calibration_Constants) return Deci_Celsius;
    --  Get the temperature from raw values in 0.1 Celsius
 
+   type Celsius is delta 0.1 digits 3 range -99.00 .. 99.00;
+   --  Temperature in degrees Celsius. The accuracy of the device is in the
+   --  range of 0.5 .. 1.5.
+
+   function Temperature
+     (Value       : Measurement;
+      Calibration : Calibration_Constants) return Celsius is
+        (0.1 * Deci_Celsius'(Temperature (Value, Calibration)));
+   --
+   --  Get the temperature from raw values in Celsius
+
    Humidity_Small : constant := 1.0 / 2 ** 10;
 
    type Relative_Humidity is delta Humidity_Small range 0.0 .. 100.0;
@@ -112,7 +123,7 @@ package BME280 is
 
    type Oversampling_Kind is (Skip, X1, X2, X4, X8, X16);
 
-   type IRR_Filter_Kind is (Off, X2, X4, X8, X16);
+   type IIR_Filter_Kind is (Off, X2, X4, X8, X16);
 
    type Sensor_Mode is (Sleep, Forced, Normal);
    --  Sensor modes. Sleep - sensor is off, Forced - measure once and go to

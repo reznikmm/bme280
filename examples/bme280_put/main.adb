@@ -53,7 +53,7 @@ begin
    --  Read calibration data into Clib
    BME280_I2C.Read_Calibration (Calib, Ok);
 
-   --  Consigure IRR filter and minimal incativity delay
+   --  Consigure IIR filter and minimal incativity delay
    BME280_I2C.Configure
      (Standby    => 0.5,
       Filter     => BME280.X16,

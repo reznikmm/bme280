@@ -17,7 +17,7 @@ The BME280 driver enables the following functionalities:
 
 - Detect the presence of the sensor.
 - Perform a reset operation.
-- Configure the parameters of the IRR filter and oversampling for each channel.
+- Configure the parameters of the IIR filter and oversampling for each channel.
 - Read calibration coefficients.
 - Conduct measurements and calibrate the obtained values.
 - Calculate the time required for measurements.

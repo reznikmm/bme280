@@ -104,7 +104,7 @@ package body BME280.Raw is
 
    function Set_Configuration
      (Standby    : Standby_Duration;
-      Filter     : IRR_Filter_Kind;
+      Filter     : IIR_Filter_Kind;
       SPI_3_Wire : Boolean) return Configuration_Data
    is
       Data : Byte;
@@ -127,7 +127,7 @@ package body BME280.Raw is
          end;
       end if;
 
-      Data := Data * 8 + IRR_Filter_Kind'Pos (Filter);
+      Data := Data * 8 + IIR_Filter_Kind'Pos (Filter);
       Data := Data * 4 + Boolean'Pos (SPI_3_Wire);
 
       return (Configuration_Data'First => Data);

@@ -39,7 +39,7 @@ package body BME280.I2C is
 
    procedure Configure
      (Standby    : Standby_Duration := 1000.0;
-      Filter     : IRR_Filter_Kind := Off;
+      Filter     : IIR_Filter_Kind := Off;
       SPI_3_Wire : Boolean := False;
       Success    : out Boolean) is
    begin

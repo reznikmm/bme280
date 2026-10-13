@@ -23,10 +23,10 @@ package BME280.Sensors is
    procedure Configure
      (Self       : Sensor;
       Standby    : Standby_Duration := 0.5;
-      Filter     : IRR_Filter_Kind := Off;
+      Filter     : IIR_Filter_Kind := Off;
       SPI_3_Wire : Boolean := False;
       Success    : out Boolean) is abstract;
-   --  Configure the sensor to use IRR filtering and/or SPI 3-wire mode
+   --  Configure the sensor to use IIR filtering and/or SPI 3-wire mode
 
    procedure Start
      (Self        : Sensor;

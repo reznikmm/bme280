@@ -84,20 +84,20 @@ procedure Main is
         (State : GUI_Buttons.Boolean_Array) return BME280.Oversampling_Kind;
 
       function Filter
-        (State : GUI_Buttons.Boolean_Array) return BME280.IRR_Filter_Kind;
+        (State : GUI_Buttons.Boolean_Array) return BME280.IIR_Filter_Kind;
 
       ------------
       -- Filter --
       ------------
 
       function Filter
-        (State : GUI_Buttons.Boolean_Array) return BME280.IRR_Filter_Kind
+        (State : GUI_Buttons.Boolean_Array) return BME280.IIR_Filter_Kind
       is
-         Result : BME280.IRR_Filter_Kind := BME280.Off;
+         Result : BME280.IIR_Filter_Kind := BME280.Off;
       begin
          for J in State'Range loop
             exit when State (J);
-            Result := BME280.IRR_Filter_Kind'Succ (Result);
+            Result := BME280.IIR_Filter_Kind'Succ (Result);
          end loop;
 
          return Result;
@@ -122,7 +122,7 @@ procedure Main is
 
       Ok : Boolean;
    begin
-      --  Consigure IRR filter and minimal incativity delay
+      --  Consigure IIR filter and minimal incativity delay
       Sensor.Configure
         (Standby    => 0.5,
          Filter     => Filter (GUI.State (+Fi_No .. +Fi_16)),

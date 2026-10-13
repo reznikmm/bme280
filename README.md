@@ -20,7 +20,7 @@ The BME280 driver enables the following functionalities:
 
 * Detect the presence of the sensor.
 * Perform a reset operation.
-* Configure the parameters of the (shared) IRR filter and oversampling (for each channel).
+* Configure the parameters of the (shared) IIR filter and oversampling (for each channel).
 * Read calibration coefficients.
 * Conduct measurements and calibrate the obtained values.
 * Calculate the time required for measurements.
@@ -50,7 +50,7 @@ declare
 
 begin
    if BME280_I2C.Check_Chip_Id then
-      BME280_I2C.Reset (Ravenscar_Time.Delays, Ok);
+      BME280_I2C.Reset (Ravenscar_Time.Delays, Success);
       ...
 ```
 
@@ -64,7 +64,133 @@ declare
       Calibration => <>);
 begin
    if Sensor.Check_Chip_Id then
-      Sensor.Reset (Ravenscar_Time.Delays, Ok);
+      Sensor.Reset (Ravenscar_Time.Delays, Success);
+      ...
+```
+
+### Sensor Workflow
+
+Working with the sensor takes the following steps:
+
+1. **Check and reset.** `Check_Chip_Id` makes sure the sensor is present,
+   `Reset` performs a soft reset and waits until the chip is ready.
+
+2. **Read calibration.** Each chip has its own factory calibration
+   coefficients. Read them once with `Read_Calibration`, they are needed
+   to decode every measurement.
+
+3. **Configure.** While the sensor is still in sleep mode (right after the
+   reset), call `Configure` to set:
+   * `Standby` - the inactivity duration (in ms) between measurements in
+     `Normal` mode,
+   * `Filter` - the IIR filter, it affects all kinds of readings,
+   * `SPI_3_Wire` - enable 3-wire SPI mode.
+
+4. **Start.** Call `Start` with a mode and oversampling for each channel
+   (`Skip` disables the channel):
+   * `Normal` - the sensor measures continuously, with `Standby` pauses
+     between measurements,
+   * `Forced` - the sensor performs a single measurement and returns to
+     sleep, so call `Start` again for the next one,
+   * `Sleep` - stops measurements.
+
+   Use `Max_Measurement_Time` (or `Typical_Measurement_Time`) to know how
+   long a measurement takes, or poll `Measuring`.
+
+5. **Read and decode.** `Read_Measurement` returns raw values. Decode them
+   with functions from the root `BME280` package and the calibration
+   constants. Humidity and pressure depend on temperature, so decode the
+   temperature first:
+
+   ```ada
+   Temperature : constant BME280.Deci_Celsius :=
+     BME280.Temperature (Measurement, Calibration);
+   Humidity    : constant BME280.Relative_Humidity :=
+     BME280.Humidity (Measurement, Temperature, Calibration);
+   Pressure    : constant BME280.Pressure_Pa :=
+     BME280.Pressure (Measurement, Temperature, Calibration);
+   ```
+
+   The temperature is in 0.1 °C, the humidity in percent and the pressure
+   in Pa.
+
+A complete example with the generic package:
+
+```ada
+declare
+   package BME280_I2C is new BME280.I2C
+     (I2C_Port    => STM32.Device.I2C_1'Access,
+      I2C_Address => 16#76#);
+
+   Success     : Boolean;
+   Calibration : BME280.Calibration_Constants;
+   Measurement : BME280.Measurement;
+begin
+   if not BME280_I2C.Check_Chip_Id then
+      raise Program_Error with "BME280 not found";
+   end if;
+
+   BME280_I2C.Reset (Ravenscar_Time.Delays, Success);
+   BME280_I2C.Read_Calibration (Calibration, Success);
+
+   BME280_I2C.Configure
+     (Standby    => 0.5,
+      Filter     => BME280.X16,
+      SPI_3_Wire => False,
+      Success    => Success);
+
+   BME280_I2C.Start
+     (Mode        => BME280.Normal,
+      Humidity    => BME280.X1,
+      Pressure    => BME280.X16,
+      Temperature => BME280.X2,
+      Success     => Success);
+
+   --  Wait for the first measurement (the time is in microseconds)
+   Ravenscar_Time.Delays.Delay_Microseconds
+     (BME280.Max_Measurement_Time
+        (Humidity    => BME280.X1,
+         Pressure    => BME280.X16,
+         Temperature => BME280.X2));
+
+   BME280_I2C.Read_Measurement (Measurement, Success);
+
+   if Success then
+      declare
+         Temperature : constant BME280.Deci_Celsius :=
+           BME280.Temperature (Measurement, Calibration);
+         Humidity    : constant BME280.Relative_Humidity :=
+           BME280.Humidity (Measurement, Temperature, Calibration);
+         Pressure    : constant BME280.Pressure_Pa :=
+           BME280.Pressure (Measurement, Temperature, Calibration);
+      begin
+         Ada.Text_IO.Put_Line
+           ("T=" & Temperature'Image & " H=" & Humidity'Image
+            & " P=" & Pressure'Image);
+      end;
+   end if;
+
+   --  Stop measurements
+   BME280_I2C.Start (Mode => BME280.Sleep, Success => Success);
+end;
+```
+
+With the tagged type the steps are the same, but the object keeps the
+calibration constants itself, so decoding needs only the measurement:
+
+```ada
+   Sensor.Read_Calibration (Success);
+   ...
+   Sensor.Read_Measurement (Measurement, Success);
+
+   declare
+      Temperature : constant BME280.Deci_Celsius :=
+        Sensor.Temperature (Measurement);
+      Humidity    : constant BME280.Relative_Humidity :=
+        Sensor.Humidity (Measurement, Temperature);
+      Pressure    : constant BME280.Pressure_Pa :=
+        Sensor.Pressure (Measurement, Temperature);
+   begin
       ...
 ```
 
@@ -121,14 +247,14 @@ needing to specify the address for each byte.
 These functions help abstract the specifics of SPI and I2C communication,
 making it easier to focus on the sensor’s register interactions without
 worrying about protocol details. For example, you configure the sensor
-by specifying the Inactivity duration and the IRR filter:
+by specifying the Inactivity duration and the IIR filter:
 
 ```ada
 declare
    Data : Byte_Array := BME280.Raw.SPI_Write
     (BME280.Raw.Set_Configuration
       (Standby    => 10.0,
-       IRR_Filter => X16,
+       Filter     => X16,
        SPI_3_Wire => False));
 begin
    --  Now write Data to the sensor by SPI

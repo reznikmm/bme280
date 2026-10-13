@@ -41,10 +41,10 @@ package BME280.Internal is
    procedure Configure
      (Device     : Device_Context;
       Standby    : Standby_Duration;
-      Filter     : IRR_Filter_Kind;
+      Filter     : IIR_Filter_Kind;
       SPI_3_Wire : Boolean;
       Success    : out Boolean);
-   --  Configure the sensor to use IRR filtering and/or SPI 3-wire mode
+   --  Configure the sensor to use IIR filtering and/or SPI 3-wire mode
 
    procedure Start
      (Device      : Device_Context;

@@ -37,10 +37,10 @@ package BME280.I2C_Sensors is
    overriding procedure Configure
      (Self       : BME280_I2C_Sensor;
       Standby    : Standby_Duration := 0.5;
-      Filter     : IRR_Filter_Kind := Off;
+      Filter     : IIR_Filter_Kind := Off;
       SPI_3_Wire : Boolean := False;
       Success    : out Boolean);
-   --  Configure the sensor to use IRR filtering and/or SPI 3-wire mode
+   --  Configure the sensor to use IIR filtering and/or SPI 3-wire mode
 
    overriding procedure Start
      (Self        : BME280_I2C_Sensor;

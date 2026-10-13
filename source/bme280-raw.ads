@@ -44,9 +44,9 @@ package BME280.Raw is
 
    function Set_Configuration
      (Standby    : Standby_Duration;
-      Filter     : IRR_Filter_Kind;
+      Filter     : IIR_Filter_Kind;
       SPI_3_Wire : Boolean) return Configuration_Data;
-   --  Encode sensor configuration to use IRR filtering and/or SPI 3-wire mode
+   --  Encode sensor configuration to use IIR filtering and/or SPI 3-wire mode
 
    subtype Mode_Data is Byte_Array (16#F2# .. 16#F4#);
    --  Control registers (ctrl_hum, ctrl_meas). Only first and last bytes
